@@ -1,2 +1,2 @@
 # Msc-Cloud-devOpsSec-Project
-This repo holds Project i worked on during my Masters degree in National college of Ireland - Course (Cloud devOpsSec)
+Project i worked on during my Masters in Cloud computing degree at National college of Ireland - (Course: Cloud devOpsSec)
