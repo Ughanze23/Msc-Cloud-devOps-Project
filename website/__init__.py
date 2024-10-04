@@ -22,7 +22,7 @@ def create_app():
 
     from .views import views
     from .auth import auth
-    from .models import User,Role
+    from .models import User
 
     #register blueprints
     app.register_blueprint(views, url_prefix="/")
@@ -30,6 +30,9 @@ def create_app():
 
     #create database
     create_database(app)
+
+    #create roles
+    create_roles(app)
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
@@ -43,20 +46,32 @@ def create_app():
 
 
 def create_database(app):
-    from .models import Role
     if not path.exists("website/" + DB_NAME):
         with app.app_context():  # Push the app context
             db.create_all()
             logging.info("Database created successfully")
 
-        # Insert roles
-            admin_role = Role(id=1, name='admin')
-            editor_role = Role(id=2, name='editor')
-            viewer_role = Role(id=3, name='viewer')
-
-            db.session.add(admin_role)
-            db.session.add(editor_role)
-            db.session.add(viewer_role)
-
-            db.session.commit()
-            logging.info("Roles added successfully!")        
+def create_roles(app):
+    """Insert roles into thecl Role table only if they don't already exist."""
+    from .models import Role
+    with app.app_context():
+        roles = [
+            {"id": 1, "role_name": "admin"},
+            {"id": 2, "role_name": "editor"},
+            {"id": 3, "role_name": "viewer"},
+        ]
+        
+        for role_data in roles:
+            # Check if role already exists
+            role = Role.query.filter_by(role_name=role_data["role_name"]).first()
+            
+            if not role:
+                # If role doesn't exist, create and add it to the session
+                new_role = Role(id=role_data["id"], role_name=role_data["role_name"])
+                db.session.add(new_role)
+                logging.info(f"Role '{role_data['role_name']}' added successfully!")
+            else:
+                logging.info(f"Role '{role_data['role_name']}' already exists, skipping.")
+        
+        # Commit the session to save the new roles
+        db.session.commit()
