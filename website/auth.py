@@ -29,6 +29,7 @@ def login():
     
     return render_template("log-in.html",user=current_user)
 
+
 @auth.route("/sign-up", methods=["GET","POST"])
 def sign_up():
     """Controls signup page and user signUp logic"""

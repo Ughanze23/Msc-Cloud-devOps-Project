@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from sqlalchemy.sql import func
 
 
+#User table
 class User(db.Model,UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150),unique=True)
@@ -13,6 +14,17 @@ class User(db.Model,UserMixin):
     updated_at = db.Column(db.DateTime(timezone=True), default=func.now(),onupdate=func.now())
     role_id  = db.Column(db.Integer, db.ForeignKey('role.id'),default=3)
 
+#Roles table
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role_name = db.Column(db.String(100), nullable=False, unique=True)
+
+#Glossary Table
+class Glossary(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    posted_by = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    type = db.Column(db.String(100), nullable=False, unique=True)
+    description = db.Column(db.String(250), nullable=False, unique=True)
+    created_at =  db.Column(db.DateTime(timezone=True), default=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True), default=func.now(),onupdate=func.now())

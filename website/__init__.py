@@ -22,7 +22,7 @@ def create_app():
 
     from .views import views
     from .auth import auth
-    from .models import User
+    from .models import User,Glossary
 
     #register blueprints
     app.register_blueprint(views, url_prefix="/")
