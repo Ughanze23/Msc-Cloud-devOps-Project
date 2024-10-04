@@ -43,7 +43,20 @@ def create_app():
 
 
 def create_database(app):
+    from .models import Role
     if not path.exists("website/" + DB_NAME):
         with app.app_context():  # Push the app context
             db.create_all()
             logging.info("Database created successfully")
+
+        # Insert roles
+            admin_role = Role(id=1, name='admin')
+            editor_role = Role(id=2, name='editor')
+            viewer_role = Role(id=3, name='viewer')
+
+            db.session.add(admin_role)
+            db.session.add(editor_role)
+            db.session.add(viewer_role)
+
+            db.session.commit()
+            logging.info("Roles added successfully!")        

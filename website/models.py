@@ -10,9 +10,9 @@ class User(db.Model,UserMixin):
     username = db.Column(db.String(150))
     password = db.Column(db.String(150))
     created_at =  db.Column(db.DateTime(timezone=True), default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True), default=func.now())
-    role_id  = db.Column(db.Integer, db.ForeignKey('role.id'),default="3")
+    updated_at = db.Column(db.DateTime(timezone=True), default=func.now(),onupdate=func.now())
+    role_id  = db.Column(db.Integer, db.ForeignKey('role.id'),default=3)
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    role_name = db.Column(db.String(150))
+    role_name = db.Column(db.String(100), nullable=False, unique=True)
