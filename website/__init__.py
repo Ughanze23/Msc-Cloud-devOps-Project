@@ -34,6 +34,9 @@ def create_app():
     #create roles
     create_roles(app)
 
+    #create admin
+    create_admin(app)
+
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
     login_manager.init_app(app)
@@ -71,7 +74,23 @@ def create_roles(app):
                 db.session.add(new_role)
                 logging.info(f"Role '{role_data['role_name']}' added successfully!")
             else:
-                logging.info(f"Role '{role_data['role_name']}' already exists, skipping.")
+                logging.info(f"Role '{role_data['role_name']}' already exists.")
         
         # Commit the session to save the new roles
         db.session.commit()
+
+def create_admin(app):
+    """create an admin user"""
+    from .models import User
+    from werkzeug.security import generate_password_hash,check_password_hash
+    with app.app_context():
+        user = User.query.filter_by(username="admin").first()
+
+        if not user:
+            admin = User(email="ughanzepolycarp@gmail.com", username="admin",password=generate_password_hash("admin",method="pbkdf2:sha256"),role_id=1)
+            db.session.add(admin)
+            db.session.commit()
+            logging.info("admin created successfully")
+        
+        else:
+            logging.info("Admin user already exists")

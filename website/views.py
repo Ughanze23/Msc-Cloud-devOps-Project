@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request,flash
+from flask import Blueprint, render_template, request,flash,redirect,url_for
 from flask_login import login_required,current_user
 from .models import Glossary
 from . import db
@@ -16,7 +16,8 @@ def home():
 @views.route("/glossary",methods=["GET","PUT"])
 def glossary():
     """View all busness glossary page"""
-    return render_template("glossary.html",user=current_user)
+    glossaries = Glossary.query.all()
+    return render_template("glossary.html",user=current_user, glossaries = glossaries)
 
 @login_required
 @views.route("/post-glossary", methods=["GET","POST"])
@@ -38,6 +39,7 @@ def post_glossary():
             db.session.add(entry)
             db.session.commit()
             flash("Entry Successful..", category="success")
+            return redirect(url_for("views.glossary"))
 
     return render_template("post-glossary.html",user=current_user)
 
