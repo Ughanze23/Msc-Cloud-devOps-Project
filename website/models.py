@@ -12,8 +12,9 @@ class User(db.Model,UserMixin):
     password = db.Column(db.String(150))
     created_at =  db.Column(db.DateTime(timezone=True), default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), default=func.now(),onupdate=func.now())
-    role_id  = db.Column(db.Integer, db.ForeignKey('role.id'),default=3)
-    role = db.relationship('Role', backref='user')
+    role_id  = db.Column(db.Integer, db.ForeignKey("role.id"),default=3)
+    role = db.relationship("Role", backref="user")
+    posted_by = db.relationship("Glossary", backref="user")
 
 #Roles table
 class Role(db.Model):

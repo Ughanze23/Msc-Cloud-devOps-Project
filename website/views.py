@@ -35,7 +35,7 @@ def post_glossary():
         elif not description:
             flash("", category="error")
         else :
-            entry = Glossary(posted_by=current_user.id,name=name,type=type,description=description,)
+            entry = Glossary(posted_by=current_user.id,name=name,type=type,description=description)
             db.session.add(entry)
             db.session.commit()
             flash("Entry Successful..", category="success")
@@ -44,7 +44,7 @@ def post_glossary():
     return render_template("post-glossary.html",user=current_user)
 
 @login_required
-@views.route("/admin",methods=["GET","POST","PUT","DELETE"])
+@views.route("/users",methods=["GET","POST","PUT","DELETE"])
 def users():
     """Admin Page"""
     users = User.query.all()
