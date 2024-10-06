@@ -13,6 +13,7 @@ class User(db.Model,UserMixin):
     created_at =  db.Column(db.DateTime(timezone=True), default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), default=func.now(),onupdate=func.now())
     role_id  = db.Column(db.Integer, db.ForeignKey('role.id'),default=3)
+    role = db.relationship('Role', backref='user')
 
 #Roles table
 class Role(db.Model):

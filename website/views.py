@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request,flash,redirect,url_for
 from flask_login import login_required,current_user
-from .models import Glossary
+from .models import Glossary, User
 from . import db
 
 
@@ -45,6 +45,7 @@ def post_glossary():
 
 @login_required
 @views.route("/admin",methods=["GET","POST","PUT","DELETE"])
-def admin():
+def users():
     """Admin Page"""
-    return render_template("admin.html",user=current_user)
+    users = User.query.all()
+    return render_template("users.html",user=current_user,users=users)

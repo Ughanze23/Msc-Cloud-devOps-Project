@@ -27,7 +27,7 @@
                         <a class="nav-item nav-link {% if request.path == url_for('views.glossary') %}active{% endif %}" href="/glossary">Glossary</a>
                     </div>
                     <div class="navbar-nav ms-auto"> <!-- This div will push links to the right -->
-                        <a class="nav-item nav-link {% if request.path == url_for('views.admin') %}active{% endif %}" href="/admin">Admin</a>
+                        <a class="nav-item nav-link {% if request.path == url_for('views.users') %}active{% endif %}" href="/users">Users</a>
                         <a class="nav-item nav-link {% if request.path == url_for('auth.log_out') %}active{% endif %}" href="/log-out">Logout</a>
                     </div>
                     {% else %}
