@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request,flash,redirect,url_for
 from flask_login import login_required,current_user
 from .models import Glossary, User
 from . import db
-
+import logging
 
 views = Blueprint("views", __name__)
 
@@ -49,3 +49,21 @@ def users():
     """Admin Page"""
     users = User.query.all()
     return render_template("users.html",user=current_user,users=users)
+
+
+@login_required
+@views.route("/users/delete-user/<user_id>")
+def delete_user(user_id):
+    """delete user"""
+
+    user = User.query.filter_by(id=user_id).first()
+
+    if current_user.role.role_name == "admin":
+        db.session.delete(user)
+        db.session.commit()
+        flash("User Deleted Successfully", category="success")
+        return redirect(url_for("views.users"))
+
+    else:
+        flash("You are not authorized to perform this operation!", category="error")
+    return redirect(url_for("views.users"))
