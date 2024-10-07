@@ -60,7 +60,7 @@ def sign_up():
             flash("Username is too short.", category="error")
 
         elif len(password1) < 6:
-            flash("Pass must be more than 6 characters!", category="error")    
+            flash("Password must be more than 6 characters!", category="error")    
 
         #create account
         else:

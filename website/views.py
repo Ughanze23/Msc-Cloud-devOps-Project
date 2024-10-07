@@ -67,3 +67,28 @@ def delete_user(user_id):
     else:
         flash("You are not authorized to perform this operation!", category="error")
     return redirect(url_for("views.users"))
+
+
+@login_required
+@views.route("/change-role/user_id=<int:user_id>")
+def change_role(user_id):
+    """change user role"""
+
+    # Get the user ID and role from the query parameters
+    new_role = request.args.get('role',type=int)
+    user = User.query.filter_by(id=user_id).first()
+
+    if current_user.role.role_name != "admin":
+        flash("You are not authorized to perform this operation!", category="error")
+        return redirect(url_for("views.users"))
+    
+    elif user.role_id == new_role:
+        flash("The selected role is the same as the current role.", category="error")
+        return redirect(url_for("views.users"))
+
+    else:
+        user.role_id = new_role
+        db.session.commit()
+        flash("User role updated successfully", category="success")
+
+    return redirect(url_for("views.users"))

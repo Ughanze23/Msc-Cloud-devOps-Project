@@ -30,8 +30,10 @@
                     <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                     </button>
                     <ul class="dropdown-menu">
-                        <li ><a class="dropdown-item" href="/users/update-role/{{user.id}}">
-                            Change Role</a>
+                        <li ><a  class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            Change Role
+                        </a>
+                          
                         </li>
                         <li >
                             <a class="dropdown-item" href="/users/delete-user/{{user.id}}">
@@ -44,5 +46,46 @@
         {% endfor %}
     </tbody>
 </table>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Change User Role</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <select id="selected_role" class="form-select" aria-label="Default select example" required>
+                <option selected>Select role</option>
+                <option value=1>Admin</option>
+                <option value=2>Editor</option>
+                <option value=3>Viewer</option>
+            </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <!-- Save changes button with ID for JavaScript -->
+          <button type="button" class="btn btn-primary" id="saveChangesButton">Save changes</button>
+        </div>
+      </div>
+    </div>
 </div>
+</div>
+<script>
+    document.getElementById('saveChangesButton').addEventListener('click', function () {
+        const selectedRole = document.getElementById('selected_role').value;
+        const userId = '{{ user.id }}'; // Using Jinja to inject user.id into the script
+        
+        // Check if a role is selected
+        if (selectedRole === 'Select role') {
+            alert('Please select a role');
+        } else {
+            // Construct URL with selected role and user ID as query parameters
+            const redirectUrl = `/change-role/user_id=${userId}?role=${selectedRole}`;
+            // Redirect to the constructed URL
+            window.location.href = redirectUrl;
+        }
+    });
+</script>
+
 {% endblock %}
