@@ -55,7 +55,7 @@ def users():
 @views.route("/users/delete-user/<user_id>")
 def delete_user(user_id):
     """delete user"""
-    
+
     user = User.query.filter_by(id=user_id).first()
 
     if current_user.role.role_name == "admin":
