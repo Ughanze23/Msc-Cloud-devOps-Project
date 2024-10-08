@@ -84,10 +84,10 @@ def create_admin(app):
     from .models import User
     from werkzeug.security import generate_password_hash,check_password_hash
     with app.app_context():
-        user = User.query.filter_by(username="admin").first()
+        user = User.query.filter_by(username="superadmin").first()
 
         if not user:
-            admin = User(email="ughanzepolycarp@gmail.com", username="admin",password=generate_password_hash("admin",method="pbkdf2:sha256"),role_id=1)
+            admin = User(email="admin@gmail.com", username="superadmin",password=generate_password_hash("admin",method="pbkdf2:sha256"),role_id=1)
             db.session.add(admin)
             db.session.commit()
             logging.info("admin created successfully")
