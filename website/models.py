@@ -24,8 +24,8 @@ class Role(db.Model):
 #Glossary Table
 class Glossary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    posted_by = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
-    created_by = db.relationship("User", backref="glossaries")
+    posted_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    creator = db.relationship("User", backref="glossaries")
     name = db.Column(db.String(100), nullable=False, unique=True)
     type = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.String(500), nullable=False, unique=True)
