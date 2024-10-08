@@ -14,7 +14,7 @@ class User(db.Model,UserMixin):
     updated_at = db.Column(db.DateTime(timezone=True), default=func.now(),onupdate=func.now())
     role_id  = db.Column(db.Integer, db.ForeignKey("role.id"),default=3)
     role = db.relationship("Role", backref="user")
-    posted_by = db.relationship("Glossary", backref="user")
+
 
 #Roles table
 class Role(db.Model):
@@ -25,8 +25,9 @@ class Role(db.Model):
 class Glossary(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     posted_by = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
+    created_by = db.relationship("User", backref="glossaries")
     name = db.Column(db.String(100), nullable=False, unique=True)
     type = db.Column(db.String(100), nullable=False, unique=True)
-    description = db.Column(db.String(250), nullable=False, unique=True)
+    description = db.Column(db.String(500), nullable=False, unique=True)
     created_at =  db.Column(db.DateTime(timezone=True), default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), default=func.now(),onupdate=func.now())

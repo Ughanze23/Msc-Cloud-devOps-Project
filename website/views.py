@@ -6,12 +6,15 @@ import logging
 
 views = Blueprint("views", __name__)
 
+
+#----------------- homepage ------------------
 @views.route("/")
 @views.route("/home")
 @login_required
 def home():
     return render_template("home.html",user=current_user)
 
+#---------------------- glossary page ------------------------------
 @login_required
 @views.route("/glossary",methods=["GET","PUT"])
 def glossary():
@@ -25,7 +28,7 @@ def post_glossary():
     """Post Glossary page"""
     if request.method == "POST":
         name = request.form.get("name").title()
-        type = request.form.get("type")
+        category = request.form.get("category")
         description = request.form.get("description").capitalize()
 
         if not name:
@@ -33,9 +36,9 @@ def post_glossary():
         elif not type:
             flash("Select a type for the business term", category="error")
         elif not description:
-            flash("", category="error")
+            flash("Please enter a description for the business term", category="error")
         else :
-            entry = Glossary(posted_by=current_user.id,name=name,type=type,description=description)
+            entry = Glossary(posted_by=current_user.id,name=name,type=category,description=description)
             db.session.add(entry)
             db.session.commit()
             flash("Entry Successful..", category="success")
@@ -43,6 +46,38 @@ def post_glossary():
 
     return render_template("post-glossary.html",user=current_user)
 
+
+
+@login_required
+@views.route("/glossary/edit-term/<int:entry_id>", methods=["GET","POST"])
+def edit_term(entry_id):
+    """update Business term details"""
+
+    entry = Glossary.query.filter_by(id=entry_id).first()
+    new_business_category = request.args.get('category')
+    new_description = request.args.get('description')
+
+    #if request.method == "POST":
+
+    if not new_business_category and not new_description:
+        flash("Enter a new Category or Business term description.","error")
+        return redirect(url_for("views.glossary"))
+        
+    if new_business_category:
+        entry.type = new_business_category
+    
+    if new_description:
+        entry.description = new_description
+
+    db.session.commit()
+    flash("Business term updated successfully", "success")
+    return redirect(url_for("views.glossary"))
+
+    return render_template("glossary.html", user=current_user)
+
+
+
+# ------------------- users page ----------------------------
 @login_required
 @views.route("/users",methods=["GET","POST","PUT","DELETE"])
 def users():
