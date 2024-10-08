@@ -41,25 +41,30 @@
     
     
   <!-- Your flash message HTML code -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-      <div class="flash-message-container">
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+    <div class="flash-message-container">
         {% for category, message in messages %}
-          {% if category == "error" %}
-          <div class="flash-message alert alert-danger alert-dismissible fade show" role="alert">
-            {{ message }} 
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-          {% else %}
-          <div class="flash-message alert alert-success alert-dismissible fade show" role="alert">
-            {{ message }} 
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
-          {% endif %}
+            <div class="flash-message alert alert-{{ category == 'error' and 'danger' or 'success' }} alert-dismissible fade show" role="alert">
+                {{ message }} 
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
         {% endfor %}
-      </div>
-  {% endif %}
+    </div>
+{% endif %}
 {% endwith %}
+
+<script>
+    // Automatically close flash messages after 2 seconds
+    setTimeout(function() {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(function(message) {
+            // Use Bootstrap's JavaScript method to dismiss the alert
+            const bsAlert = new bootstrap.Alert(message);
+            bsAlert.close();
+        });
+    }, 3000); // Time in milliseconds (2000ms = 2 seconds)
+</script>
 
     <div class="container">{%block content %}{% endblock %}</div>
 
