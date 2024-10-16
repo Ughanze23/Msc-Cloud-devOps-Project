@@ -1,15 +1,16 @@
-from flask import Blueprint, render_template,redirect,url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request
 from .models import User
 from . import db
 from flask import flash
-from flask_login import login_user,logout_user, login_required,current_user
+from flask_login import login_user, logout_user, login_required, current_user
 import re
-from werkzeug.security import generate_password_hash,check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 auth = Blueprint("auth", __name__)
 
-#--------------------- login -----------------------
-@auth.route("/login", methods=["GET","POST"])
+
+# --------------------- login -----------------------
+@auth.route("/login", methods=["GET", "POST"])
 def login():
     """User login page functionality"""
     if request.method == "POST":
@@ -18,19 +19,20 @@ def login():
 
         user = User.query.filter_by(email=email).first()
         if user:
-            if check_password_hash(user.password,password):
-                flash("Sucessfully logged in..",category="success")
-                login_user(user,remember=True)
+            if check_password_hash(user.password, password):
+                flash("Sucessfully logged in..", category="success")
+                login_user(user, remember=True)
                 return redirect(url_for("views.home"))
             else:
-                flash("Incorrect password entered!!!",category="error")
+                flash("Incorrect password entered!!!", category="error")
         else:
-            flash("Account does not exist!!",category="error")
-    
-    return render_template("log-in.html",user=current_user)
+            flash("Account does not exist!!", category="error")
 
-#---------------------- signup ------------------------------
-@auth.route("/sign-up", methods=["GET","POST"])
+    return render_template("log-in.html", user=current_user)
+
+
+# ---------------------- signup ------------------------------
+@auth.route("/sign-up", methods=["GET", "POST"])
 def sign_up():
     """Controls signup page and user signUp logic"""
     if request.method == "POST":
@@ -39,17 +41,19 @@ def sign_up():
         password1 = request.form.get("password1")
         password2 = request.form.get("password2")
 
-        #fetch username and password
-        user_exists  = User.query.filter_by(email=email).first()
+        # fetch username and password
+        user_exists = User.query.filter_by(email=email).first()
         username_exists = User.query.filter_by(username=username).first()
-        
-        #check if username and email already in database
+
+        # check if username and email already in database
         if user_exists:
             flash("A user with this email already exists.", category="error")
 
-        elif re.match(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',email) is None:
+        elif (
+            re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email) is None
+        ):
             flash("Enter a valid email.", category="error")
-        
+
         elif username_exists:
             flash("A user with this username already exists.", category="error")
 
@@ -60,18 +64,23 @@ def sign_up():
             flash("Username is too short.", category="error")
 
         elif len(password1) < 6:
-            flash("Password must be more than 6 characters!", category="error")    
+            flash("Password must be more than 6 characters!", category="error")
 
-        #create account
+        # create account
         else:
-            new_user = User(email=email, username=username,password=generate_password_hash(password1,method="pbkdf2:sha256"))
+            new_user = User(
+                email=email,
+                username=username,
+                password=generate_password_hash(password1, method="pbkdf2:sha256"),
+            )
             db.session.add(new_user)
             db.session.commit()
-            login_user(new_user,remember=True)
-            flash('User created Successfully!',category="success")
-            return redirect(url_for('views.home'))
+            login_user(new_user, remember=True)
+            flash("User created Successfully!", category="success")
+            return redirect(url_for("views.home"))
 
-    return render_template("sign-up.html",user=current_user)
+    return render_template("sign-up.html", user=current_user)
+
 
 # ----------------- logout ----------------------
 @auth.route("/log-out")
