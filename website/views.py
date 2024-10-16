@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request,flash,redirect,url_for
-from flask_login import login_required,current_user
+from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask_login import login_required, current_user
 from .models import Glossary, User
 from . import db
 import logging
@@ -7,23 +7,25 @@ import logging
 views = Blueprint("views", __name__)
 
 
-#----------------- homepage ------------------
+# ----------------- homepage ------------------
 @views.route("/")
 @views.route("/home")
 @login_required
 def home():
-    return render_template("home.html",user=current_user)
+    return render_template("home.html", user=current_user)
 
-#---------------------- glossary page ------------------------------
+
+# ---------------------- glossary page ------------------------------
 @login_required
-@views.route("/glossary",methods=["GET","PUT"])
+@views.route("/glossary", methods=["GET", "PUT"])
 def glossary():
     """View all busness glossary page"""
     glossaries = Glossary.query.all()
-    return render_template("glossary.html",user=current_user, glossaries = glossaries)
+    return render_template("glossary.html", user=current_user, glossaries=glossaries)
+
 
 @login_required
-@views.route("/post-glossary", methods=["GET","POST"])
+@views.route("/post-glossary", methods=["GET", "POST"])
 def post_glossary():
     """Post Glossary page"""
     if request.method == "POST":
@@ -37,35 +39,39 @@ def post_glossary():
             flash("Select a type for the business term", category="error")
         elif not description:
             flash("Please enter a description for the business term", category="error")
-        else :
-            entry = Glossary(posted_by=current_user.id,name=name,type=category,description=description)
+        else:
+            entry = Glossary(
+                posted_by=current_user.id,
+                name=name,
+                type=category,
+                description=description,
+            )
             db.session.add(entry)
             db.session.commit()
             flash("Entry Successful..", category="success")
             return redirect(url_for("views.glossary"))
 
-    return render_template("post-glossary.html",user=current_user)
-
+    return render_template("post-glossary.html", user=current_user)
 
 
 @login_required
-@views.route("/glossary/edit-term/<int:entry_id>", methods=["GET","POST"])
+@views.route("/glossary/edit-term/<int:entry_id>", methods=["GET", "POST"])
 def edit_term(entry_id):
     """update Business term details"""
 
     entry = Glossary.query.filter_by(id=entry_id).first()
-    new_business_category = request.args.get('category')
-    new_description = request.args.get('description')
+    new_business_category = request.args.get("category")
+    new_description = request.args.get("description")
 
-    #if request.method == "POST":
+    # if request.method == "POST":
 
     if not new_business_category and not new_description:
-        flash("Enter a new Category or Business term description.","error")
+        flash("Enter a new Category or Business term description.", "error")
         return redirect(url_for("views.glossary"))
-        
+
     if new_business_category:
         entry.type = new_business_category
-    
+
     if new_description:
         entry.description = new_description
 
@@ -76,14 +82,13 @@ def edit_term(entry_id):
     return render_template("glossary.html", user=current_user)
 
 
-
 # ------------------- users page ----------------------------
 @login_required
-@views.route("/users",methods=["GET","POST","PUT","DELETE"])
+@views.route("/users", methods=["GET", "POST", "PUT", "DELETE"])
 def users():
     """Admin Page"""
     users = User.query.all()
-    return render_template("users.html",user=current_user,users=users)
+    return render_template("users.html", user=current_user, users=users)
 
 
 @login_required
@@ -110,13 +115,13 @@ def change_role(user_id):
     """change user role"""
 
     # Get the user ID and role from the query parameters
-    new_role = request.args.get('role',type=int)
+    new_role = request.args.get("role", type=int)
     user = User.query.filter_by(id=user_id).first()
 
     if current_user.role.role_name != "admin":
         flash("You are not authorized to perform this operation!", category="error")
         return redirect(url_for("views.users"))
-    
+
     elif user.role_id == new_role:
         flash("The selected role is the same as the current role.", category="error")
         return redirect(url_for("views.users"))
