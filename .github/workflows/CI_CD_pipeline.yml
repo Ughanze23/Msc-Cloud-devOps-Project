@@ -1,0 +1,19 @@
+#name of Workflow
+name: Deploy app
+
+#control trigger for workflow
+on: 
+    #Triggers the workflow on push or pull request events but only on the "main branch"
+    push:
+        branches: ["main"]
+    pull_request:
+        branches: ["main",]
+    #Trigger workflow manually through github actions UI
+    workflow_dispatch:
+
+jobs:
+    CI:
+        runs-on: ubuntu-latest
+        steps:
+            - name: test message
+              run: "echo test job"
