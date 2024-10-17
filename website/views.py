@@ -79,7 +79,7 @@ def edit_term(entry_id):
     flash("Business term updated successfully", "success")
     return redirect(url_for("views.glossary"))
 
-    return render_template("glossary.html", user=current_user)
+    #return render_template("glossary.html", user=current_user)
 
 
 # ------------------- users page ----------------------------
