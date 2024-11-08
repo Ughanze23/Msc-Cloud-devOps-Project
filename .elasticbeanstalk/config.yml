@@ -1,0 +1,13 @@
+branch-defaults:
+  main:
+    environment: cds-flask-app-env
+environment-defaults:
+  cds-flask-app-env:
+    branch: null
+    repository: null
+global:
+  application_name: loan-business-glossary-app
+  default_ec2_keyname: null
+  default_platform: Python 3.8
+  default_region: eu-west-1
+  sc: git

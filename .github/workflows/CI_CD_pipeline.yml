@@ -1,52 +1,126 @@
-#name of Workflow
+# Name of Workflow
 name: Deploy app
 
-#control trigger for workflow
-on: 
-    #Triggers the workflow on push or pull request events but only on the "main branch"
-    push:
-        branches: ["main"]
-    pull_request:
-        branches: ["main",]
-    #Trigger workflow manually through github actions UI
-    workflow_dispatch:
+# Control trigger for workflow
+on:
+  # Triggers the workflow on push or pull request events but only on the "main" branch
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  # Trigger workflow manually through github actions UI
+  workflow_dispatch:
+
+ #declare environment variables   
+env:
+  AWS_REGION: eu-west-1
+  EB_ENVIRONMENT_NAME: cds-flask-app-env
+  EB_APPLICATION_NAME: loan-business-glossary-app
+  EB_DEPLOY_PACKAGE: deploy.zip
+  TERRAFORM_VERSION: 1.5.0
 
 jobs:
-    CI:
-        runs-on: ubuntu-latest
-        #1: get code from github
-        steps: 
-            - name: Fetch code
-              uses: actions/checkout@v3
-        
-        #2: install python
-            - name: install python 3.12
-              uses: actions/setup-python@v5
-              with:
-                python-version: '3.12'
-        
-        #3: Install dependencies
-            - name: install dependencies 
-              run: |
-                python -m pip install --upgrade pip
-                pip install -r requirements.txt
+  # Static Code Analysis - JOB STATIC CODE (Corrected name)
+  CI: #Add code to Github main branch
+    runs-on: ubuntu-latest
+    steps:
+      # 1: Get code from GitHub
+      - name: Fetch code
+        uses: actions/checkout@v3
 
-        #4: Lint code
-            - name: install black
-              run: pip install black
-            - name: change working directory
-              run: cd ./website
-            - name: lint code
-              run: black .
-              working-directory: ./website
-            
+      # 2: Install python
+      - name: Install Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
-        #4: test end of first test
-            - name: end of flow
-              run: "echo end of test"
-        
-        #5 Static Code Analysis      
-        
-        #6 run unit and integration tests
+      # 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
+      # 4: Lint code
+      - name: Install black
+        run: pip install black
+      - name: Change working directory
+        run: cd ./website
+      - name: Lint code
+        run: black .
+        working-directory: ./website
+
+      # 5: Run tests 
+        # Add your actual test commands here
+
+  IAC: # setup AWS infra
+    needs: CI  
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'  # Only run on push to main branch
+
+    steps:
+        # 1: Get code from GitHub
+      - name: Fetch code
+        uses: actions/checkout@v3
+
+        # 2: declare AWS access credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
         
+        #3: install terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+        
+        #4: intialiaze a terraform directory
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+        
+        #5: create terraform plan file
+      - name: Terraform Plan
+        working-directory: ./terraform
+        run: terraform plan
+          
+        #6: Execute terraform steps
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: terraform apply -auto-approve
+
+  CD: #deploy app to AWS elastic beanstalk
+    needs: IAC  
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'  
+
+    steps:
+      # 1: Get code from GitHub
+      - name: Fetch code
+        uses: actions/checkout@v3
+
+      #2: declare aws access credentials
+      - name: setup AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      #3: Create deployment package 
+      - name: Generate deployment package
+        run: zip -r ${{ env.EB_DEPLOY_PACKAGE }} . -x "*.git*" "*.github*" "terraform/*"
+
+      #4: Deplpy webapp to AWS Elastic Beanstalk  
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          region: ${{ env.AWS_REGION }}
+          application_name: ${{ env.EB_APPLICATION_NAME }}
+          environment_name: ${{ env.EB_ENVIRONMENT_NAME }}
+          version_label: ${{ github.sha }}
+          deployment_package: ${{ env.EB_DEPLOY_PACKAGE }}
