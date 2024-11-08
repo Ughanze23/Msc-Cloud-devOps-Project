@@ -26,7 +26,7 @@ def login():
             else:
                 flash("Incorrect password entered!!!", category="error")
         else:
-            flash("Account does not exist!!", category="error")
+            flash("Account does not exist!!, please sign up", category="error")
 
     return render_template("log-in.html", user=current_user)
 

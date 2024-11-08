@@ -54,17 +54,7 @@
     {% endif %}
     {% endwith %}
 
-    <script>
-        // Automatically close flash messages after 2 seconds
-        setTimeout(function() {
-            const flashMessages = document.querySelectorAll('.flash-message');
-            flashMessages.forEach(function(message) {
-                // Use Bootstrap's JavaScript method to dismiss the alert
-                const bsAlert = new bootstrap.Alert(message);
-                bsAlert.close();
-            }, 5000); 
-        });
-    </script>
+   
 
     <div class="container">{% block content %}{% endblock %}</div>
 

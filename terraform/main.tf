@@ -7,7 +7,7 @@ terraform {
   }
   
   backend "s3" {
-    bucket = "mycppproject23384069"
+    bucket = "cpp-23384069"
     key    = "flask-app/terraform.tfstate"
     region = "eu-west-1"
   }

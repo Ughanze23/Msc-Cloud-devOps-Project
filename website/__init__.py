@@ -1,22 +1,32 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
+import os
 from flask_login import LoginManager
 import logging
+from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s")
 
 
 db = SQLAlchemy()
-DB_NAME = "database.db"
+#DB_NAME = "database.db"
 
 
 def create_app():
+    load_dotenv()
     """Create Flask app"""
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "Hash-session-data"
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
-
+    #app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
+    
+    DB_USER = os.environ.get("DB_USER")
+    DB_PASSWORD = os.environ.get("DB_PASSWORD")
+    DB_HOST = os.environ.get("DB_HOST")
+    DB_NAME = os.environ.get("DB_NAME")
+    
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+    
     # init database
     db.init_app(app)
 
@@ -47,16 +57,14 @@ def create_app():
 
     return app
 
-
 def create_database(app):
-    if not path.exists("website/" + DB_NAME):
-        with app.app_context():  # Push the app context
-            db.create_all()
-            logging.info("Database created successfully")
+    with app.app_context():
+        db.create_all()
+        logging.info("Database created successfully")
 
 
 def create_roles(app):
-    """Insert roles into thecl Role table only if they don't already exist."""
+    """Insert roles into the Role table only if they don't already exist."""
     from .models import Role
 
     with app.app_context():
