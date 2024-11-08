@@ -48,7 +48,7 @@ def post_glossary():
             )
             db.session.add(entry)
             db.session.commit()
-            flash("Entry Successful..", category="success")
+            flash("Business Term Created Successful..", category="success")
             return redirect(url_for("views.glossary"))
 
     return render_template("post-glossary.html", user=current_user)
@@ -80,6 +80,23 @@ def edit_term(entry_id):
     return redirect(url_for("views.glossary"))
 
     #return render_template("glossary.html", user=current_user)
+
+@login_required
+@views.route("/glossary/delete-entry/<entry_id>")
+def delete_entry(entry_id):
+    """delete entry"""
+
+    entry = Glossary.query.filter_by(id=entry_id).first()
+
+    if current_user.role.role_name == "admin":
+        db.session.delete(entry)
+        db.session.commit()
+        flash("Entry Deleted Successfully", category="success")
+        return redirect(url_for("views.glossary"))
+
+    else:
+        flash("You are not authorized to perform this operation!", category="error")
+    return redirect(url_for("views.glossary"))
 
 
 # ------------------- users page ----------------------------
