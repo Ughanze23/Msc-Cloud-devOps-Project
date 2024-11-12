@@ -16,8 +16,8 @@ db = SQLAlchemy()
 def create_app():
     load_dotenv()
     """Create Flask app"""
-    app = Flask(__name__)
-    app.config["SECRET_KEY"] = "Hash-session-data"
+    application = Flask(__name__)
+    application.config["SECRET_KEY"] = "Hash-session-data"
     #app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     
     DB_USER = os.environ.get("DB_USER")
@@ -25,49 +25,49 @@ def create_app():
     DB_HOST = os.environ.get("DB_HOST")
     DB_NAME = os.environ.get("DB_NAME")
     
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+    application.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
     
     # init database
-    db.init_app(app)
+    db.init_app(application)
 
     from .views import views
     from .auth import auth
     from .models import User, Glossary
 
     # register blueprints
-    app.register_blueprint(views, url_prefix="/")
-    app.register_blueprint(auth, url_prefix="/")
+    application.register_blueprint(views, url_prefix="/")
+    application.register_blueprint(auth, url_prefix="/")
 
     # create database
-    create_database(app)
+    create_database(application)
 
     # create roles
-    create_roles(app)
+    create_roles(application)
 
     # create admin
-    create_admin(app)
+    create_admin(application)
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
-    login_manager.init_app(app)
+    login_manager.init_app(application)
 
     @login_manager.user_loader
     def load_user(id):
         return User.query.get(int(id))
 
-    return app
+    return application
 
-def create_database(app):
-    with app.app_context():
+def create_database(application):
+    with application.app_context():
         db.create_all()
         logging.info("Database created successfully")
 
 
-def create_roles(app):
+def create_roles(application):
     """Insert roles into the Role table only if they don't already exist."""
     from .models import Role
 
-    with app.app_context():
+    with application.app_context():
         roles = [
             {"id": 1, "role_name": "admin"},
             {"id": 2, "role_name": "editor"},
@@ -90,12 +90,12 @@ def create_roles(app):
         db.session.commit()
 
 
-def create_admin(app):
+def create_admin(application):
     """create an admin user"""
     from .models import User
     from werkzeug.security import generate_password_hash, check_password_hash
 
-    with app.app_context():
+    with application.app_context():
         user = User.query.filter_by(username="superadmin").first()
 
         if not user:
