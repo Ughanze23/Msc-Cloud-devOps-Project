@@ -13,12 +13,12 @@ on:
 
  #declare environment variables   
 env:
-  AWS_REGION: eu-west-1
+  AWS_REGION: us-east-1
   EB_ENVIRONMENT_NAME: cds-flask-app-env
   EB_APPLICATION_NAME: loan-business-glossary-app
   EB_DEPLOY_PACKAGE: deploy.zip
   TERRAFORM_VERSION: 1.5.0
-  DB_HOST: database-23384069.chwlezgyi7rm.eu-west-1.rds.amazonaws.com
+  DB_HOST: database-1.cvhifpi70v8r.us-east-1.rds.amazonaws.com
   DB_USER: ${{ secrets.DB_USER }}
   DB_NAME: Cloud_DevOPsSec
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
