@@ -1,32 +1,23 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.0"
-    }
-  }
-  
-  backend "s3" {
-    bucket = "x23384069-cpp"
-    key    = "flask-app/terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
-provider "aws" {
-  region = "us-east-1"
-}
-
-resource "aws_elastic_beanstalk_application" "flask_app" {
-  name        = "loan-business-glossary-app"
-  description = "Loan Business Glossary Flask application deployed through CI/CD"
-}
-
 resource "aws_elastic_beanstalk_environment" "flask_app_env" {
   name                = "cds-flask-app-env"
   application         = aws_elastic_beanstalk_application.flask_app.name
   solution_stack_name = "64bit Amazon Linux 2023 v4.3.0 running Python 3.9"
 
+  # Set the instance profile
+  setting {
+    namespace = "aws:autoscaling:launchconfiguration"
+    name      = "IamInstanceProfile"
+    value     = "LabInstanceProfile"  
+  }
+
+  # Set the service role
+  setting {
+    namespace  = "aws:elasticbeanstalk:environment"
+    name       = "ServiceRole"
+    value      = "LabRole"  
+  }
+
+  # Additional settings for environment capacity
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "InstanceType"
