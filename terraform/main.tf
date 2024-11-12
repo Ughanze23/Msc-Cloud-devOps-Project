@@ -25,7 +25,7 @@ resource "aws_elastic_beanstalk_application" "flask_app" {
 resource "aws_elastic_beanstalk_environment" "flask_app_env" {
   name                = "cds-flask-app-env"
   application         = aws_elastic_beanstalk_application.flask_app.name
-  solution_stack_name = "64bit Amazon Linux 2 v3.3.13 running Python 3.12"
+  solution_stack_name = "64bit Amazon Linux 2 v3.3.13 running Python 3.9"
 
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
