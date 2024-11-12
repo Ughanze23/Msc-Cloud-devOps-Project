@@ -1,3 +1,8 @@
+resource "aws_elastic_beanstalk_application" "flask_app" {
+  name        = "loan-business-glossary-app"
+  description = "Loan Business Glossary Flask application deployed through CI/CD"
+}
+
 resource "aws_elastic_beanstalk_environment" "flask_app_env" {
   name                = "cds-flask-app-env"
   application         = aws_elastic_beanstalk_application.flask_app.name
