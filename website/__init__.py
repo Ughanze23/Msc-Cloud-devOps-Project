@@ -20,10 +20,10 @@ def create_app():
     application.config["SECRET_KEY"] = "Hash-session-data"
     #app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     
-    DB_USER = os.environ.get("DB_USER")
-    DB_PASSWORD = os.environ.get("DB_PASSWORD")
-    DB_HOST = os.environ.get("DB_HOST")
-    DB_NAME = os.environ.get("DB_NAME")
+    DB_USER = os.environ.get("DB_USER","postgres")
+    DB_PASSWORD = os.environ.get("DB_PASSWORD","$uperBoy2024")
+    DB_HOST = os.environ.get("DB_HOST","database-1.cvhifpi70v8r.us-east-1.rds.amazonaws.com")
+    DB_NAME = os.environ.get("DB_NAME","Cloud_DevOPsSec")
     
     application.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
     
