@@ -85,13 +85,18 @@ jobs:
       - name: Terraform Init
         working-directory: ./terraform
         run: terraform init
+      
+        #5: check for errors in terraform main.tf file
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate
         
-        #5: create terraform plan file
+        #6: create terraform plan file
       - name: Terraform Plan
         working-directory: ./terraform
         run: terraform plan
           
-        #6: Execute terraform steps
+        #7: Execute terraform steps
       - name: Terraform Apply
         working-directory: ./terraform
         run: terraform apply -auto-approve
