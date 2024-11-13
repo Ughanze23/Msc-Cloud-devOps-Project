@@ -90,17 +90,25 @@ jobs:
       - name: Terraform Validate
         working-directory: ./terraform
         run: terraform validate
+      
+      #6
+      - name: Check if environment exists (modify based on your needs)
+        run: |
+          aws elasticbeanstalk describe-environments --environment-names ${{ env.EB_ENVIRONMENT_NAME }} | jq -r '.Environments | length > 0'
+        id: environment_exists
         
-        #6: create terraform plan file
+      #7: create terraform plan file
       - name: Terraform Plan
         working-directory: ./terraform
         run: terraform plan -out tfplan
+        if: steps.environment_exists.outputs == 'false'
        
           
-        #7: Execute terraform steps
+        #8: Execute terraform steps
       - name: Terraform Apply
         working-directory: ./terraform
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve tfplan     
+        if: steps.environment_exists.outputs == 'false'
     
 
   CD: #deploy app to AWS elastic beanstalk
