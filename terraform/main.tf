@@ -7,11 +7,6 @@ terraform {
     }
   }
   
-  backend "s3" {
-    bucket = "x23384069-cpp"
-    key    = "flask-app/terraform.tfstate"
-    region = "us-east-1" 
-  }
 }
 
 # Existing resources for your Elastic Beanstalk application
