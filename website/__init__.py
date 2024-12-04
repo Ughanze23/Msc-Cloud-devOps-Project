@@ -27,7 +27,7 @@ def create_app():
         application.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     else:
         DB_USER = os.environ.get("DB_USER", "postgres")
-        DB_PASSWORD = os.environ.get("DB_PASSWORD", "$uperBoy2024")
+        DB_PASSWORD = os.environ.get("DB_PASSWORD", "K$K$rot2024")
         DB_HOST = os.environ.get("DB_HOST", "database-1.cvhifpi70v8r.us-east-1.rds.amazonaws.com")
         DB_NAME = os.environ.get("DB_NAME", "Cloud_DevOPsSec")
         application.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
