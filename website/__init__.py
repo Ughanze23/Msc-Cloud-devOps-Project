@@ -22,12 +22,15 @@ def create_app():
     
     #values are hard codes because of lack of privileges on aws to create elasticbeanstalk:UpdateEnvironment
     #i could not set this values explicitly in my eb env
-    DB_USER = os.environ.get("DB_USER","postgres")
-    DB_PASSWORD = os.environ.get("DB_PASSWORD","$uperBoy2024")
-    DB_HOST = os.environ.get("DB_HOST","database-1.cvhifpi70v8r.us-east-1.rds.amazonaws.com")
-    DB_NAME = os.environ.get("DB_NAME","Cloud_DevOPsSec")
-    
-    application.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
+    # Add this testing config check
+    if application.config.get("TESTING"):
+        application.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    else:
+        DB_USER = os.environ.get("DB_USER", "postgres")
+        DB_PASSWORD = os.environ.get("DB_PASSWORD", "$uperBoy2024")
+        DB_HOST = os.environ.get("DB_HOST", "database-1.cvhifpi70v8r.us-east-1.rds.amazonaws.com")
+        DB_NAME = os.environ.get("DB_NAME", "Cloud_DevOPsSec")
+        application.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
     
     # init database
     db.init_app(application)
