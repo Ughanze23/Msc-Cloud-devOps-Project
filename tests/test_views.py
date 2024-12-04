@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 def app():
     app = create_app()
     app.config.update({
-        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',  # Use in-memory SQLite for testing
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',  
         'TESTING': True,
         'WTF_CSRF_ENABLED': False,
         'SQLALCHEMY_TRACK_MODIFICATIONS': False
