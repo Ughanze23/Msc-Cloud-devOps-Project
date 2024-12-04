@@ -46,11 +46,9 @@ def create_app():
     # create database
     create_database(application)
 
-    # create roles
-    create_roles(application)
-
-    # create admin
-    create_admin(application)
+    if not application.config.get("TESTING"):
+       create_roles(application)
+       create_admin(application)
 
     login_manager = LoginManager()
     login_manager.login_view = "auth.login"
