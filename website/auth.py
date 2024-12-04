@@ -88,6 +88,47 @@ def sign_up():
     return render_template("sign-up.html", user=current_user)
 
 
+# ---------------------- reset password ------------------------------
+@auth.route("/reset-password-request", methods=["GET", "POST"])
+def reset_password_request():
+    if current_user.is_authenticated:
+        return redirect(url_for("views.home"))
+        
+    if request.method == "POST":
+        email = request.form.get("email")
+        user = User.query.filter_by(email=email).first()
+        
+        if user:
+            return redirect(url_for("auth.reset_password", user_id=user.id))
+        flash("Email address not found", "error")
+        
+    return render_template("reset_password_request.html", user=current_user)
+
+@auth.route("/reset-password/<int:user_id>", methods=["GET", "POST"])
+def reset_password(user_id):
+    if current_user.is_authenticated:
+        return redirect(url_for("views.home"))
+        
+    user = User.query.get_or_404(user_id)
+    
+    if request.method == "POST":
+        password1 = request.form.get("password1")
+        password2 = request.form.get("password2")
+        
+        if password1 != password2:
+            flash("Passwords don't match", "error")
+        elif len(password1) < 6:
+            flash("Password must be at least 6 characters", "error")
+        else:
+            user.password = generate_password_hash(password1, method="pbkdf2:sha256")
+            db.session.commit()
+            flash("Password has been reset", "success")
+            return redirect(url_for("auth.login"))
+            
+    return render_template("reset_password.html", user=current_user)
+
+
+
 # ----------------- logout ----------------------
 @auth.route("/log-out")
 @login_required
