@@ -17,36 +17,37 @@ def client(app):
 
 @pytest.fixture
 def init_database(app):
-  with app.app_context():
-      db.create_all()
-      
-      # Create roles with ids
-      admin_role = Role(id=1, role_name='admin')
-      user_role = Role(id=2, role_name='user')
-      db.session.add_all([admin_role, user_role])
-      
-      # Create test users with hashed passwords
-      admin = User(
-          email='admin@test.com',
-          username='admin',
-          password=generate_password_hash('password123'),
-          role=admin_role
-      )
-      user = User(
-          email='user@test.com',
-          username='user',
-          password=generate_password_hash('password123'),
-          role=user_role
-      )
-      db.session.add_all([admin, user])
-      
-      # Create test glossary entry
-      entry = Glossary(posted_by=user.id, name='Test Term', type='Category', description='Test description')
-      db.session.add(entry)
-      
-      db.session.commit()
-      yield db
-      db.drop_all()
+   with app.app_context():
+       db.drop_all()  
+       db.create_all()
+       
+       # Create roles with ids
+       admin_role = Role(id=1, role_name='admin')
+       user_role = Role(id=2, role_name='user')
+       db.session.add_all([admin_role, user_role])
+       
+       # Create test users 
+       admin = User(
+           email='admin@test.com',
+           username='admin',
+           password=generate_password_hash('password123'),
+           role=admin_role
+       )
+       user = User(
+           email='user@test.com',
+           username='user', 
+           password=generate_password_hash('password123'),
+           role=user_role
+       )
+       db.session.add_all([admin, user])
+       
+       # Create test glossary entry
+       entry = Glossary(posted_by=user.id, name='Test Term', type='Category', description='Test description')
+       db.session.add(entry)
+       
+       db.session.commit()
+       yield db
+       db.drop_all()
 
 def test_home_page(client, init_database):
   client.post('/login', data={'email': 'user@test.com', 'password': 'password123'})
