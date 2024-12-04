@@ -9,6 +9,10 @@ def app():
    app = create_app()
    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
    app.config['TESTING'] = True
+   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+   with app.app_context():
+       db.drop_all()
+       db.create_all()
    return app
 
 @pytest.fixture
@@ -22,24 +26,22 @@ def runner(app):
 @pytest.fixture
 def init_database(app):
    with app.app_context():
-       db.drop_all()
-       db.create_all()
-       # Create role
-       role = Role(id=2, role_name='user')
-       db.session.add(role)
-       db.session.commit()
+       # Create roles
+       user_role = Role(id=2, role_name='user')
+       admin_role = Role(id=1, role_name='admin')
+       db.session.add_all([user_role, admin_role])
 
        # Create user
        user = User(
            email='test@test.com',
-           username='testuser', 
+           username='testuser',
            password=generate_password_hash('password123'),
            role_id=2
        )
        db.session.add(user)
        db.session.commit()
        yield db
-       db.drop_all()
+       db.session.remove()
 
 def test_login_success(client, init_database):
    response = client.post('/login', data={
