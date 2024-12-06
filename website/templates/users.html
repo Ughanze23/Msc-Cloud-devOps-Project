@@ -40,9 +40,12 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="/users/delete-user/{{ user.id }}">
-                                    Delete User
-                                </a> 
+                                <form action="{{ url_for('views.delete_user', user_id=user.id) }}" method="POST" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this user?')">
+                                        Delete User
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </div>
@@ -60,42 +63,65 @@
                     <h1 class="modal-title fs-5" id="exampleModalLabel">Change User Role</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <select id="selected_role" class="form-select" aria-label="Default select example" required>
-                        <option selected>Select role</option>
-                        <option value=1>Admin</option>
-                        <option value=2>Editor</option>
-                        <option value=3>Viewer</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-dark" id="saveChangesButton">Save changes</button>
-                </div>
+                <form id="changeRoleForm" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="modal-body">
+                        <select id="role" name="role" class="form-select" aria-label="Default select example" required>
+                            <option value="">Select role</option>
+                            <option value="1">Admin</option>
+                            <option value="2">Editor</option>
+                            <option value="3">Viewer</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-dark">Save changes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Get modal and set event listener for when the modal is triggered
-    document.getElementById('exampleModal').addEventListener('show.bs.modal', function (event) {
-        const button = event.relatedTarget; 
-        const userId = button.getAttribute('data-user-id');
-        const saveChangesButton = document.getElementById('saveChangesButton');
-        saveChangesButton.setAttribute('data-user-id', userId);
-    });
-
-    document.getElementById('saveChangesButton').addEventListener('click', function () {
-        const selectedRole = document.getElementById('selected_role').value;
-        const userId = this.getAttribute('data-user-id'); 
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('exampleModal');
+        const form = document.getElementById('changeRoleForm');
         
-        if (selectedRole === 'Select role') {
-            alert('Please select a role');
-        } else {
-            const redirectUrl = `/change-role/user_id=${userId}?role=${selectedRole}`;
-            window.location.href = redirectUrl;
-        }
+        modal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const userId = button.getAttribute('data-user-id');
+            form.action = `/change-role/user_id=${userId}`;
+        });
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const selectedRole = document.getElementById('role').value;
+            if (!selectedRole) {
+                alert('Please select a role');
+                return;
+            }
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while changing the role');
+            });
+        });
     });
 </script>
 {% endblock %}

@@ -35,14 +35,17 @@
                     <ul class="dropdown-menu">
                         <li>
                             <a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                               entry_id="{{ entry.id }}">
+                               data-entry-id="{{ entry.id }}">
                                 Edit term
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="/glossary/delete-entry/{{ entry.id }}">
-                                Delete entry
-                            </a> 
+                            <form action="{{ url_for('views.delete_entry', entry_id=entry.id) }}" method="POST" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="dropdown-item" onclick="return confirm('Are you sure you want to delete this entry?')">
+                                    Delete entry
+                                </button>
+                            </form>
                         </li>
                     </ul>
                 </div>
@@ -63,7 +66,8 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form>
+            <form id="editForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group mb-3">
                     <label for="category">Category</label>
                     <select class="form-select form-select-sm" id="category" name="category" aria-label="Small select example">
@@ -86,30 +90,43 @@
       </div>
     </div>
 </div>
-</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const modal = document.getElementById('exampleModal');
-        const form = document.querySelector('#exampleModal form');
+        const form = document.getElementById('editForm');
         let entryID;
     
         modal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
-            entryID = button.getAttribute('entry_id');
+            entryID = button.getAttribute('data-entry-id');
+            // Set the form's action URL when the modal is shown
+            form.action = `/glossary/edit-term/${entryID}`;
         });
     
         form.addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent the form from submitting normally
-    
-            const category = document.getElementById('category').value;
-            const description = document.getElementById('description').value;
-    
-            // Construct URL with entryID, category, and description
-            const redirectUrl = `/glossary/edit-term/${entryID}?category=${encodeURIComponent(category)}&description=${encodeURIComponent(description)}`;
+            event.preventDefault();
             
-            // Redirect to the constructed URL
-            window.location.href = redirectUrl;
+            const formData = new FormData(form);
+            
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while saving changes');
+            });
         });
     });
 </script>

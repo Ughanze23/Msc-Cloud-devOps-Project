@@ -1,11 +1,11 @@
-from flask import Flask
+from flask import Flask, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 import os
 from flask_login import LoginManager
 import logging
 from dotenv import load_dotenv
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 import secrets
 from datetime import timedelta
 
@@ -27,7 +27,6 @@ def create_app():
     application.config['SESSION_COOKIE_HTTPONLY'] = True
     application.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
  
-    
     # Initialize CSRF protection before other extensions
     csrf = CSRFProtect()
     csrf.init_app(application)
@@ -35,6 +34,12 @@ def create_app():
     # Add CSRF configuration
     application.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Token lifetime in seconds (1 hour)
     application.config['WTF_CSRF_SSL_STRICT'] = True  # Enables CSRF protection on HTTPS
+    
+    # Add CSRF error handler
+    @application.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        logging.warning(f"CSRF error occurred: {e.description}")
+        return redirect(url_for('auth.login')), 302
     
     DB_USER = os.environ.get("DB_USER")
     DB_PASSWORD = os.environ.get("DB_PASSWORD")
@@ -124,6 +129,5 @@ def create_admin(application):
             db.session.add(admin)
             db.session.commit()
             logging.info("admin created successfully")
-
         else:
             logging.info("Admin user already exists")
