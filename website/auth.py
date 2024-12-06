@@ -131,7 +131,7 @@ def reset_password(user_id):
 
 
 # ----------------- logout ----------------------
-@auth.route("/log-out")
+@auth.route("/log-out",methods=["POST"])
 @login_required
 def log_out():
     """log out user"""
