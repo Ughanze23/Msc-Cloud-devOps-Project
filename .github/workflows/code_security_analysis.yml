@@ -27,12 +27,17 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      
       - name: Run OWASP Dependency-Check
-        uses: dependency-check/gh-action@v5.2.0
+        uses: dependency-check/Dependency-Check_Action@main
         with:
-          project: Flask-Application
-          scan: requirements.txt
-          format: "HTML"
+          project: 'Flask-Application'
+          path: 'requirements.txt'
+          format: 'HTML'
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+      
       - name: Upload Dependency Check Report
         uses: actions/upload-artifact@v3
         with:
