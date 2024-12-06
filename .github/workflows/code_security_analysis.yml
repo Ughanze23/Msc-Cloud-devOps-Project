@@ -21,6 +21,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   securityanalysis:
     runs-on: ubuntu-latest
     steps:
@@ -49,16 +50,29 @@ jobs:
         run: pip install semgrep
       - name: Run Semgrep for OWASP and Flask
         run: |
-          semgrep --config owasp-top-ten --config "https://semgrep.dev/p/r/flask" --json --output semgrep-results.json
+          semgrep --config "p/owasp-top-ten" --config "p/flask" --json --output semgrep-results.json
       - name: Upload Semgrep Report
         uses: actions/upload-artifact@v3
         with:
           name: semgrep-report
           path: semgrep-results.json
 
-      # Slack Notification
+  notify:
+    needs: [sonarcloud, securityanalysis]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download Bandit Report
+        uses: actions/download-artifact@v3
+        with:
+          name: bandit-report
+          
+      - name: Download Semgrep Report
+        uses: actions/download-artifact@v3
+        with:
+          name: semgrep-report
+
       - name: Send Slack Notification
-        if: always()
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
