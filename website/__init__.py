@@ -5,23 +5,33 @@ import os
 from flask_login import LoginManager
 import logging
 from dotenv import load_dotenv
+from flask_wtf.csrf import CSRFProtect
+import secrets
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s")
 
-
 db = SQLAlchemy()
-#DB_NAME = "database.db"
-
 
 def create_app():
     load_dotenv()
     """Create Flask app"""
     application = Flask(__name__)
-    application.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-    #app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
     
-    #values are hard codes because of lack of privileges on aws to create elasticbeanstalk:UpdateEnvironment
-    #i could not set this values explicitly in my eb env
+    # Ensure secret key exists and is sufficiently random
+    if not os.environ.get("SECRET_KEY"):
+        logging.warning("SECRET_KEY not found in environment, generating a secure random key")
+        application.config["SECRET_KEY"] = secrets.token_hex(32)
+    else:
+        application.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+    
+    # Initialize CSRF protection before other extensions
+    csrf = CSRFProtect()
+    csrf.init_app(application)
+    
+    # Add CSRF configuration
+    application.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Token lifetime in seconds (1 hour)
+    application.config['WTF_CSRF_SSL_STRICT'] = True  # Enables CSRF protection on HTTPS
+    
     DB_USER = os.environ.get("DB_USER")
     DB_PASSWORD = os.environ.get("DB_PASSWORD")
     DB_HOST = os.environ.get("DB_HOST")
