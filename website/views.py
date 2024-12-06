@@ -6,6 +6,9 @@ import logging
 
 views = Blueprint("views", __name__)
 
+GLOSSARYPAGE="views.glossary"
+AUTH_ERR_MSG="You are not authorized to perform this operation!"
+USERSPAGE="views.users"
 
 # ----------------- homepage ------------------
 @views.route("/")
@@ -49,7 +52,7 @@ def post_glossary():
             db.session.add(entry)
             db.session.commit()
             flash("Business Term Created Successful..", category="success")
-            return redirect(url_for("views.glossary"))
+            return redirect(url_for(GLOSSARYPAGE))
 
     return render_template("post-glossary.html", user=current_user)
 
@@ -67,7 +70,7 @@ def edit_term(entry_id):
 
     if not new_business_category and not new_description:
         flash("Enter a new Category or Business term description.", "error")
-        return redirect(url_for("views.glossary"))
+        return redirect(url_for(GLOSSARYPAGE))
 
     if new_business_category:
         entry.type = new_business_category
@@ -77,9 +80,8 @@ def edit_term(entry_id):
 
     db.session.commit()
     flash("Business term updated successfully", "success")
-    return redirect(url_for("views.glossary"))
+    return redirect(url_for(GLOSSARYPAGE))
 
-    #return render_template("glossary.html", user=current_user)
 
 @login_required
 @views.route("/glossary/delete-entry/<entry_id>")
@@ -92,11 +94,11 @@ def delete_entry(entry_id):
         db.session.delete(entry)
         db.session.commit()
         flash("Entry Deleted Successfully", category="success")
-        return redirect(url_for("views.glossary"))
+        return redirect(url_for(GLOSSARYPAGE))
 
     else:
-        flash("You are not authorized to perform this operation!", category="error")
-    return redirect(url_for("views.glossary"))
+        flash(AUTH_ERR_MSG, category="error")
+    return redirect(url_for(GLOSSARYPAGE))
 
 
 # ------------------- users page ----------------------------
@@ -119,11 +121,11 @@ def delete_user(user_id):
         db.session.delete(user)
         db.session.commit()
         flash("User Deleted Successfully", category="success")
-        return redirect(url_for("views.users"))
+        return redirect(url_for(USERSPAGE))
 
     else:
-        flash("You are not authorized to perform this operation!", category="error")
-    return redirect(url_for("views.users"))
+        flash(AUTH_ERR_MSG, category="error")
+    return redirect(url_for(USERSPAGE))
 
 
 @login_required
@@ -136,16 +138,16 @@ def change_role(user_id):
     user = User.query.filter_by(id=user_id).first()
 
     if current_user.role.role_name != "admin":
-        flash("You are not authorized to perform this operation!", category="error")
-        return redirect(url_for("views.users"))
+        flash(AUTH_ERR_MSG, category="error")
+        return redirect(url_for(USERSPAGE))
 
     elif user.role_id == new_role:
         flash("The selected role is the same as the current role.", category="error")
-        return redirect(url_for("views.users"))
+        return redirect(url_for(USERSPAGE))
 
     else:
         user.role_id = new_role
         db.session.commit()
         flash("User role updated successfully", category="success")
 
-    return redirect(url_for("views.users"))
+    return redirect(url_for(USERSPAGE))

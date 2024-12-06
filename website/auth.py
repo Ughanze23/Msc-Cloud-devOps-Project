@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 auth = Blueprint("auth", __name__)
 
+HOMEPAGE="views.home"
 
 # --------------------- login -----------------------
 @auth.route("/login", methods=["GET", "POST"])
@@ -22,7 +23,7 @@ def login():
             if check_password_hash(user.password, password):
                 flash("Sucessfully logged in..", category="success")
                 login_user(user, remember=True)
-                return redirect(url_for("views.home"))
+                return redirect(url_for(HOMEPAGE))
             else:
                 flash("Incorrect password entered!!!", category="error")
         else:
@@ -74,7 +75,7 @@ def sign_up():
                     db.session.commit()
                     login_user(new_user, remember=True)
                     flash("User created Successfully!", category="success")
-                    return redirect(url_for("views.home"))
+                    return redirect(url_for(HOMEPAGE))
                 except Exception as e:
                     db.session.rollback()
                     flash("An error occurred while creating the user", category="error")
@@ -92,7 +93,7 @@ def sign_up():
 @auth.route("/reset-password-request", methods=["GET", "POST"])
 def reset_password_request():
     if current_user.is_authenticated:
-        return redirect(url_for("views.home"))
+        return redirect(url_for(HOMEPAGE))
         
     if request.method == "POST":
         email = request.form.get("email")
@@ -107,7 +108,7 @@ def reset_password_request():
 @auth.route("/reset-password/<int:user_id>", methods=["GET", "POST"])
 def reset_password(user_id):
     if current_user.is_authenticated:
-        return redirect(url_for("views.home"))
+        return redirect(url_for(HOMEPAGE))
         
     user = User.query.get_or_404(user_id)
     
