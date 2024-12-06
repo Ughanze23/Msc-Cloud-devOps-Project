@@ -1,0 +1,76 @@
+name: Security Workflow
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  sonarcloud:
+    name: SonarQube Cloud Static code analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+      - name: SonarQube Cloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  securityanalysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      # Run Bandit
+      - name: Install Bandit
+        run: pip install bandit
+      - name: Run Bandit
+        run: |
+          bandit -r ./website/ -f json -o bandit-report.json --severity-level high
+      - name: Upload Bandit Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: bandit-report
+          path: bandit-report.json
+
+      # Run Semgrep
+      - name: Install Semgrep
+        run: pip install semgrep
+      - name: Run Semgrep for OWASP and Flask
+        run: |
+          semgrep --config owasp-top-ten --config "https://semgrep.dev/p/r/flask" --json --output semgrep-results.json
+      - name: Upload Semgrep Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-report
+          path: semgrep-results.json
+
+      # Slack Notification
+      - name: Send Slack Notification
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          bandit_issues=$(jq '.results | length' bandit-report.json)
+          semgrep_issues=$(jq '.results | length' semgrep-results.json)
+          if [ "$bandit_issues" -gt 0 ] || [ "$semgrep_issues" -gt 0 ]; then
+            message="*Vulnerability Alert*\n\n"
+            if [ "$bandit_issues" -gt 0 ]; then
+              message+="*Bandit:* $bandit_issues issues found.\n"
+            fi
+            if [ "$semgrep_issues" -gt 0 ]; then
+              message+="*Semgrep:* $semgrep_issues issues found.\n"
+            fi
+            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" "$SLACK_WEBHOOK_URL"
+          fi
