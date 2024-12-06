@@ -7,6 +7,7 @@ import logging
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 import secrets
+from datetime import timedelta
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s")
 
@@ -19,6 +20,12 @@ def create_app():
     
     # Ensure secret key is sufficiently random
     application.config["SECRET_KEY"] = secrets.token_hex(32)
+
+    # Session configuration
+    application.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) 
+    application.config['SESSION_COOKIE_SECURE'] = True
+    application.config['SESSION_COOKIE_HTTPONLY'] = True
+    application.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
  
     
     # Initialize CSRF protection before other extensions
