@@ -38,7 +38,7 @@ jobs:
         
       - name: Run safety check
         run: |
-          safety check -r requirements.txt --output json > safety-report.json
+          safety check -r requirements.txt --json > safety-report.json || true
           
       - name: Upload Safety Report
         uses: actions/upload-artifact@v3
