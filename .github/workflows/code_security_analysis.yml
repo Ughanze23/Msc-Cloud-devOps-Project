@@ -71,14 +71,7 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep
       - name: Run Semgrep for OWASP and Flask
-        run: |
-          semgrep --config "p/python" \
-                 --config "p/owasp-top-ten" \
-                 --config "p/flask" \
-                 --config "p/flask-security-audit" \
-                 --json \
-                 --output semgrep-results.json \
-                 ./website/
+        run: semgrep --config "p/python" --config "p/owasp-top-ten" --config "p/flask" --config "p/flask-security-audit" --json --output semgrep-results.json ./website/
       - name: Upload Semgrep Report
         uses: actions/upload-artifact@v3
         with:
