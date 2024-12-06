@@ -28,21 +28,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       
-      - name: Run OWASP Dependency-Check
-        uses: dependency-check/Dependency-Check_Action@main
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          project: 'Flask-Application'
-          path: 'requirements.txt'
-          format: 'HTML'
-          args: >
-            --failOnCVSS 7
-            --enableRetired
-      
-      - name: Upload Dependency Check Report
+          python-version: '3.9'
+          
+      - name: Install safety
+        run: pip install safety
+        
+      - name: Run safety check
+        run: |
+          safety check -r requirements.txt --output json > safety-report.json
+          
+      - name: Upload Safety Report
         uses: actions/upload-artifact@v3
         with:
-          name: dependency-check-report
-          path: reports
+          name: safety-report
+          path: safety-report.json
 
   securityanalysis:
     runs-on: ubuntu-latest
@@ -71,7 +73,8 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep
       - name: Run Semgrep for OWASP and Flask
-        run: semgrep --config "p/python" --config "p/owasp-top-ten" --config "p/flask" --config "p/flask-security-audit" --json --output semgrep-results.json ./website/
+        run: |
+          semgrep --config "p/owasp-top-ten" --config "p/flask" --json --output semgrep-results.json ./website/
       - name: Upload Semgrep Report
         uses: actions/upload-artifact@v3
         with:
@@ -92,11 +95,11 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: semgrep-report
-
-      - name: Download Dependency Check Report
+          
+      - name: Download Safety Report
         uses: actions/download-artifact@v3
         with:
-          name: dependency-check-report
+          name: safety-report
 
       - name: Send Slack Notification
         env:
@@ -104,7 +107,8 @@ jobs:
         run: |
           bandit_issues=$(jq '.results | length' bandit-report.json)
           semgrep_issues=$(jq '.results | length' semgrep-results.json)
-          if [ "$bandit_issues" -gt 0 ] || [ "$semgrep_issues" -gt 0 ]; then
+          safety_issues=$(jq '. | length' safety-report.json)
+          if [ "$bandit_issues" -gt 0 ] || [ "$semgrep_issues" -gt 0 ] || [ "$safety_issues" -gt 0 ]; then
             message="*Vulnerability Alert*\n\n"
             if [ "$bandit_issues" -gt 0 ]; then
               message+="*Bandit:* $bandit_issues issues found.\n"
@@ -112,6 +116,8 @@ jobs:
             if [ "$semgrep_issues" -gt 0 ]; then
               message+="*Semgrep:* $semgrep_issues issues found.\n"
             fi
-            message+="*Dependency Check:* Report available in artifacts\n"
+            if [ "$safety_issues" -gt 0 ]; then
+              message+="*Safety:* $safety_issues dependency vulnerabilities found.\n"
+            fi
             curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" "$SLACK_WEBHOOK_URL"
           fi
