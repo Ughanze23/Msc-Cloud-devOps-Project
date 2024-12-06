@@ -17,12 +17,9 @@ def create_app():
     """Create Flask app"""
     application = Flask(__name__)
     
-    # Ensure secret key exists and is sufficiently random
-    if not os.environ.get("SECRET_KEY"):
-        logging.warning("SECRET_KEY not found in environment, generating a secure random key")
-        application.config["SECRET_KEY"] = secrets.token_hex(32)
-    else:
-        application.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+    # Ensure secret key is sufficiently random
+    application.config["SECRET_KEY"] = secrets.token_hex(32)
+ 
     
     # Initialize CSRF protection before other extensions
     csrf = CSRFProtect()

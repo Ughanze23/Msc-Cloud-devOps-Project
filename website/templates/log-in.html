@@ -5,6 +5,8 @@
 <div class="login-container">
     <h3>Login</h3>
     <form method="POST">
+         <!-- Add CSRF Token -->
+         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group">
             <label for="email">Email Address</label>
             <input type="text" id="email" name="email" class="form-control" 
