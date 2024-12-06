@@ -38,7 +38,7 @@ jobs:
         run: pip install bandit
       - name: Run Bandit
         run: |
-          bandit -r ./website/ -f json -o bandit-report.json --severity-level high
+          bandit -r ./website/ -f json -o bandit-report.json
       - name: Upload Bandit Report
         uses: actions/upload-artifact@v3
         with:
@@ -50,7 +50,7 @@ jobs:
         run: pip install semgrep
       - name: Run Semgrep for OWASP and Flask
         run: |
-          semgrep --config "p/owasp-top-ten" --config "p/flask" --json --output semgrep-results.json
+          semgrep --config "p/owasp-top-ten" --config "p/flask" --json --output semgrep-results.json ./website/
       - name: Upload Semgrep Report
         uses: actions/upload-artifact@v3
         with:
