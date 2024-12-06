@@ -36,9 +36,9 @@ jobs:
       - name: Install safety
         run: pip install safety
         
-      - name: Run safety check
+      - name: Run safety Scan
         run: |
-          safety check -r requirements.txt --json > safety-report.json || true
+          safety scan -r requirements.txt --json > safety-report.json || true
           
       - name: Upload Safety Report
         uses: actions/upload-artifact@v3
@@ -81,67 +81,4 @@ jobs:
           name: semgrep-report
           path: semgrep-results.json
 
-  notify:
-    needs: [sonarcloud, securityanalysis, dependency-check]
-    runs-on: ubuntu-latest
-    if: always()
-    steps:
-      - name: Download Bandit Report
-        uses: actions/download-artifact@v3
-        with:
-          name: bandit-report
-          
-      - name: Download Semgrep Report
-        uses: actions/download-artifact@v3
-        with:
-          name: semgrep-report
-          
-      - name: Download Safety Report
-        uses: actions/download-artifact@v3
-        with:
-          name: safety-report
-
-      - name: Send Slack Notification
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          message="*Security Scan Results*\n\n"
-          
-          # Check Bandit results
-          if [ -f bandit-report.json ]; then
-            bandit_issues=$(jq '.results | length' bandit-report.json || echo "0")
-            if [ "$bandit_issues" -gt 0 ]; then
-              message+="*Bandit:* $bandit_issues issues found.\n"
-            else
-              message+="*Bandit:* No issues found.\n"
-            fi
-          else
-            message+="*Bandit:* Report not found.\n"
-          fi
-          
-          # Check Semgrep results
-          if [ -f semgrep-results.json ]; then
-            semgrep_issues=$(jq '.results | length' semgrep-results.json || echo "0")
-            if [ "$semgrep_issues" -gt 0 ]; then
-              message+="*Semgrep:* $semgrep_issues issues found.\n"
-            else
-              message+="*Semgrep:* No issues found.\n"
-            fi
-          else
-            message+="*Semgrep:* Report not found.\n"
-          fi
-          
-          # Check Safety results
-          if [ -f safety-report.json ]; then
-            safety_issues=$(jq '. | length' safety-report.json || echo "0")
-            if [ "$safety_issues" -gt 0 ]; then
-              message+="*Safety:* $safety_issues dependency vulnerabilities found.\n"
-            else
-              message+="*Safety:* No vulnerabilities found.\n"
-            fi
-          else
-            message+="*Safety:* Report not found.\n"
-          fi
-          
-          # Send the notification regardless of whether issues were found
-          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$message\"}" "$SLACK_WEBHOOK_URL"
+ 
