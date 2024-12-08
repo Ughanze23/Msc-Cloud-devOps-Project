@@ -18,13 +18,15 @@ def create_app():
     """Create Flask app"""
     application = Flask(__name__)
     
+    application.debug = True
+
     # Ensure secret key is sufficiently random
     application.config["SECRET_KEY"] = secrets.token_hex(32)
 
     # Session configuration
     application.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) 
-    application.config['SESSION_COOKIE_SECURE'] = True
-    application.config['SESSION_COOKIE_HTTPONLY'] = False  #True
+    application.config['SESSION_COOKIE_SECURE'] = False #True
+    application.config['SESSION_COOKIE_HTTPONLY'] = True 
     application.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
  
     # Initialize CSRF protection
@@ -34,7 +36,10 @@ def create_app():
     # Add CSRF configuration
     application.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Token lifetime in seconds (1 hour)
     application.config['WTF_CSRF_SSL_STRICT'] = False #True  # Enables CSRF protection on HTTPS
-    
+
+    # Enable debug logging
+    logging.basicConfig(level=logging.DEBUG)
+
     # Add CSRF error handler
     @application.errorhandler(CSRFError)
     def handle_csrf_error(e):
