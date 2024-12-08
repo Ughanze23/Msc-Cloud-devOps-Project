@@ -19,7 +19,7 @@ resource "aws_elastic_beanstalk_application" "flask_app" {
 resource "aws_elastic_beanstalk_environment" "flask_app_env" {
   name                = "cds-flask-app-env"
   application         = aws_elastic_beanstalk_application.flask_app.name
-  solution_stack_name = "64bit Amazon Linux 2023 v4.3.0 running Python 3.9"
+  solution_stack_name = "64bit Amazon Linux 2023 v4.3.1 running Python 3.9"
 
   # Add the instance profile reference
   setting {
