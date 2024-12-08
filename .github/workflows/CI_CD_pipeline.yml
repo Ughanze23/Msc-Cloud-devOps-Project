@@ -85,8 +85,15 @@ jobs:
        
       - name: Terraform Plan
         working-directory: ./terraform
-        if: steps.check_app.outputs.exists == 'false' || steps.check_env.outputs.exists == 'false'
-        run: terraform plan -out tfplan
+        if: steps.check_env.outputs.exists == 'false'
+        run: |
+          terraform plan \
+            -var="db_host=${{ env.DB_HOST }}" \
+            -var="db_user=${{ secrets.DB_USER }}" \
+            -var="db_name=${{ env.DB_NAME }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="admin_password=${{ secrets.ADMIN_PASSWORD }}" \
+            -out tfplan
          
       - name: Terraform Apply
         working-directory: ./terraform
@@ -109,22 +116,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
-     
-      - name: Set Environment Variables in Elastic Beanstalk
-        run: |
-          aws elasticbeanstalk update-environment \
-          --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
-          --region ${{ env.AWS_REGION }} \
-          --option-settings \
-            Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_HOST,Value=${{ env.DB_HOST }} \
-            Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_USER,Value=${{ secrets.DB_USER }} \
-            Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_NAME,Value=${{ env.DB_NAME }} \
-            Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_PASSWORD,Value=${{ secrets.DB_PASSWORD }} \
-            Namespace=aws:elasticbeanstalk:application:environment,OptionName=ADMIN_PASSWORD,Value=${{ secrets.ADMIN_PASSWORD }}
-
-      - name: Wait for Elastic Beanstalk Environment to be Ready
-        run: |
-          aws elasticbeanstalk wait environment-updated --environment-name ${{ env.EB_ENVIRONMENT_NAME }} --region ${{ env.AWS_REGION }}
      
       - name: Generate deployment package
         run: zip -r ${{ env.EB_DEPLOY_PACKAGE }} . -x "*.git*" "*.github*" "terraform/*"
