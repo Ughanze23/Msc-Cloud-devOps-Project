@@ -1,9 +1,15 @@
 # Name of Workflow
 name: Deploy app
 
-# Control trigger for workflow
+# Modified trigger section
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Code analysis"]  # Name of your first workflow
+    types:
+      - completed
+    branches:
+      - main
+
 
 env:
   AWS_REGION: us-east-1
@@ -19,6 +25,7 @@ env:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Fetch code
         uses: actions/checkout@v3
