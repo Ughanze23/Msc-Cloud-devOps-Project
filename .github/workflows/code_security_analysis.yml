@@ -10,7 +10,7 @@ on:
 
 jobs:
   sonarcloud:
-    name: SonarQube Cloud Static code analysis
+    name: SonarCloud Static code analysis
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

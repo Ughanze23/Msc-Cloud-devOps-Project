@@ -13,7 +13,7 @@ on:
 
  #declare environment variables   
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-west-1
   EB_ENVIRONMENT_NAME: cds-flask-app-env
   EB_APPLICATION_NAME: loan-business-glossary-app
   EB_DEPLOY_PACKAGE: deploy.zip
@@ -52,8 +52,7 @@ jobs:
         run: black .
         working-directory: ./website
 
-      # 5: Run tests 
-        # Add your actual test commands here
+     
 
   IAC: # setup AWS infra
     needs: CI  
@@ -71,7 +70,6 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
         
         #3: install terraform
@@ -91,7 +89,7 @@ jobs:
         run: terraform validate
       
       #6
-      - name: Check if environment exists (modify based on your needs)
+      - name: Check if environment exists 
         run: |
           aws elasticbeanstalk describe-environments --environment-names ${{ env.EB_ENVIRONMENT_NAME }} | jq -r '.Environments | length > 0'
         id: environment_exists
@@ -126,26 +124,23 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: ${{ env.AWS_REGION }}
       
-    #set database connection values
-    #this step is skipped as i dont have access rights to create a elasticbeanstalk:UpdateEnvironment Policy 
-    #so db connection values are hardcoded in python script.     
-    # 3: Set Environment Variables in Elastic Beanstalk
-     # - name: Set Environment Variables in Elastic Beanstalk
-      #  run: |
-       #   aws elasticbeanstalk update-environment --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
-        #  --region ${{ env.AWS_REGION }} \
-         # --option-settings Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_HOST,Value=${{ env.DB_HOST }} \
-          #               Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_USER,Value=${{ secrets.DB_USER }} \
-           #              Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_NAME,Value=${{ env.DB_NAME }} \
-            #             Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_PASSWORD,Value=${{ secrets.DB_PASSWORD }}
-
+    
+     #3: Set Environment Variables in Elastic Beanstalk
+      - name: Set Environment Variables in Elastic Beanstalk
+        run: |
+          aws elasticbeanstalk update-environment --environment-name ${{ env.EB_ENVIRONMENT_NAME }} \
+          --region ${{ env.AWS_REGION }} \
+          --option-settings Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_HOST,Value=${{ env.DB_HOST }} \
+                         Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_USER,Value=${{ secrets.DB_USER }} \
+                         Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_NAME,Value=${{ env.DB_NAME }} \
+                         Namespace=aws:elasticbeanstalk:application:environment,OptionName=DB_PASSWORD,Value=${{ secrets.DB_PASSWORD }}\
+                         Namespace=aws:elasticbeanstalk:application:environment,OptionName=ADMIN_PASSWORD,Value=${{ secrets.ADMIN_PASSWORD }}
     # 4: Wait until environment is ready
-      #- name: Wait for Elastic Beanstalk Environment to be Ready
-      #  run: |
-       #   aws elasticbeanstalk wait environment-updated --environment-name ${{ env.EB_ENVIRONMENT_NAME }} --region ${{ env.AWS_REGON }}
+      - name: Wait for Elastic Beanstalk Environment to be Ready
+        run: |
+          aws elasticbeanstalk wait environment-updated --environment-name ${{ env.EB_ENVIRONMENT_NAME }} --region ${{ env.AWS_REGON }}
       
       #5: Create deployment package 
       - name: Generate deployment package
