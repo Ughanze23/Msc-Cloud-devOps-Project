@@ -17,8 +17,6 @@ def create_app():
     load_dotenv()
     """Create Flask app"""
     application = Flask(__name__)
-    
-    application.debug = True
 
     # Ensure secret key is sufficiently random
     application.config["SECRET_KEY"] = secrets.token_hex(32)
