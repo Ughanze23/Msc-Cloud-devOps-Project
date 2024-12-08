@@ -18,13 +18,18 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
+        current_app.logger.debug(f"Login attempt for email: {email}")
+
         user = User.query.filter_by(email=email).first()
         if user:
             if check_password_hash(user.password, password):
+                current_app.logger.debug("Password check successful")
                 flash("Sucessfully logged in..", category="success")
                 login_user(user, remember=True)
+                current_app.logger.debug("User logged in successfully")
                 return redirect(url_for(HOMEPAGE))
             else:
+                current_app.logger.debug("Password check failed")
                 flash("Incorrect password entered!!!", category="error")
         else:
             flash("Account does not exist!!, please sign up", category="error")
