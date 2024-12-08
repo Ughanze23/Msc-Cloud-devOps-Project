@@ -16,7 +16,7 @@ resource "aws_elastic_beanstalk_application" "flask_app" {
 
 # Elastic Beanstalk Environment
 resource "aws_elastic_beanstalk_environment" "flask_app_env" {
-  name                = "cds-flask-app-env-2"
+  name                = "cds-flask-app-env-3"
   application         = aws_elastic_beanstalk_application.flask_app.name
   solution_stack_name = "64bit Amazon Linux  v4.3.1 running Python 3.9" 
 
