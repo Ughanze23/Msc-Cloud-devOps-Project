@@ -20,12 +20,7 @@ resource "aws_elastic_beanstalk_environment" "flask_app_env" {
   application         = aws_elastic_beanstalk_application.flask_app.name
   solution_stack_name = "64bit Amazon Linux 2023 v4.3.1 running Python 3.9" 
 
-#launch template
-  setting {
-    namespace = "aws:autoscaling:launchconfiguration"
-    name      = "DisableLaunchConfiguration"
-    value     = "true"
-  }
+
 
   # Instance Profile
   setting {
