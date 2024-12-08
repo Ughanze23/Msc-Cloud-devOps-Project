@@ -25,7 +25,7 @@ resource "aws_elastic_beanstalk_environment" "flask_app_env" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "IamInstanceProfile"
-    value     = "arn:aws:iam::205576784570:instance-profile/LabInstanceProfile"
+    value     = "arn:aws:iam::339712727128:instance-profile/MyEC2Role"
   }
 
   setting {
