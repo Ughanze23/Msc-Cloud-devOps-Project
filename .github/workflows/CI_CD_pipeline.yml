@@ -24,7 +24,6 @@ env:
   DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
 jobs:
-  # Static Code Analysis - JOB STATIC CODE (Corrected name)
   CI: #Add code to Github main branch
     runs-on: ubuntu-latest
     steps:

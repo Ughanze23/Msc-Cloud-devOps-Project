@@ -95,32 +95,12 @@
         });
 
         form.addEventListener('submit', function(event) {
-            event.preventDefault();
-            
             const selectedRole = document.getElementById('role').value;
             if (!selectedRole) {
+                event.preventDefault();
                 alert('Please select a role');
                 return;
             }
-
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    throw new Error('Something went wrong');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while changing the role');
-            });
         });
     });
 </script>

@@ -79,11 +79,11 @@ def sign_up():
                 except Exception as e:
                     db.session.rollback()
                     flash("An error occurred while creating the user", category="error")
-                    # Log the error for debugging
+                    # Log error 
                     current_app.logger.error(f"Error creating user: {e}")
         except Exception as e:
             flash("Error with siging in , please contact admin", category="error")
-            # Log the error for debugging
+            # Log error
             current_app.logger.error(f"error in sign_up function: {e}")
 
     return render_template("sign-up.html", user=current_user)

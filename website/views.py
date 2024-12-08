@@ -29,6 +29,11 @@ def glossary():
 @views.route("/post-glossary", methods=["GET", "POST"])
 def post_glossary():
     """Post Glossary page"""
+    
+    if current_user.role.role_name == "viewer":
+        flash(AUTH_ERR_MSG, category="error")
+        return redirect(url_for(GLOSSARYPAGE))
+
     if request.method == "POST":
         name = request.form.get("name").title()
         category = request.form.get("category")

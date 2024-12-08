@@ -27,7 +27,7 @@ def create_app():
     application.config['SESSION_COOKIE_HTTPONLY'] = True
     application.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
  
-    # Initialize CSRF protection before other extensions
+    # Initialize CSRF protection
     csrf = CSRFProtect()
     csrf.init_app(application)
     

@@ -21,17 +21,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  dependency-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      
-      - name: Run Safey requirements check
-        uses: pyupio/safety-action@v1
-        with:
-          api-key: ${{ secrets.SAFETY_API_KEY }}
+    
+      - name: SonarQube Quality Gate check
+        run: |
+          sleep 5 # Give time for SonarCloud to process
+          SONAR_STATUS=$(curl -s -u ${SONAR_TOKEN}: "https://sonarcloud.io/api/qualitygates/project_status?projectKey=Ughanze23_Msc-Cloud-devOps-Project")
+          if echo $SONAR_STATUS | grep -q '"status":"ERROR"'; then
+            echo "SonarCloud Quality Gate failed"
+            exit 1
+          fi
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   securityanalysis:
     runs-on: ubuntu-latest
@@ -49,8 +49,15 @@ jobs:
         run: pip install bandit
       - name: Run Bandit
         run: |
-          bandit -r ./website/ -f json -o bandit-report.json
+          bandit -r ./website/ -f json -o bandit-report.json || echo "Issues found"
+          # Check if serious vulnerabilities exist
+          if [ "$(jq '.results | map(select(.issue_severity == "HIGH")) | length' bandit-report.json)" -gt 0 ]; then
+            echo "High severity issues found in Bandit scan"
+            exit 1
+          fi
+
       - name: Upload Bandit Report
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: bandit-report
@@ -61,11 +68,16 @@ jobs:
         run: pip install semgrep
       - name: Run Semgrep for OWASP and Flask
         run: |
-          semgrep --config "p/owasp-top-ten" --config "p/flask" --json --output semgrep-results.json ./website/
+          semgrep --config "p/owasp-top-ten" --config "p/flask" --json --output semgrep-results.json ./website/ || echo "Issues found"
+          # Check if serious vulnerabilities exist
+          if [ "$(jq '.results | length' semgrep-results.json)" -gt 0 ]; then
+            echo "Security issues found in Semgrep scan"
+            exit 1
+          fi
+
       - name: Upload Semgrep Report
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: semgrep-report
           path: semgrep-results.json
-
- 
