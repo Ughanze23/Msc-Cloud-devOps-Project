@@ -1,6 +1,6 @@
 branch-defaults:
   main:
-    environment: cds-flask-app-env
+    environment: cds-flask-app-env-2
 environment-defaults:
   cds-flask-app-env:
     branch: null

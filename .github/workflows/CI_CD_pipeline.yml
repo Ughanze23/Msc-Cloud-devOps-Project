@@ -14,7 +14,7 @@ on:
 #declare environment variables   
 env:
  AWS_REGION: eu-west-1
- EB_ENVIRONMENT_NAME: cds-flask-app-env
+ EB_ENVIRONMENT_NAME: cds-flask-app-env-2
  EB_APPLICATION_NAME: loan-business-glossary-app
  EB_DEPLOY_PACKAGE: deploy.zip
  TERRAFORM_VERSION: 1.5.0
