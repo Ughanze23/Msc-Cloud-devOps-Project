@@ -24,7 +24,7 @@ def create_app():
     # Session configuration
     application.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1) 
     application.config['SESSION_COOKIE_SECURE'] = True
-    application.config['SESSION_COOKIE_HTTPONLY'] = True
+    application.config['SESSION_COOKIE_HTTPONLY'] = False  #True
     application.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
  
     # Initialize CSRF protection
@@ -33,7 +33,7 @@ def create_app():
     
     # Add CSRF configuration
     application.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Token lifetime in seconds (1 hour)
-    application.config['WTF_CSRF_SSL_STRICT'] = True  # Enables CSRF protection on HTTPS
+    application.config['WTF_CSRF_SSL_STRICT'] = False #True  # Enables CSRF protection on HTTPS
     
     # Add CSRF error handler
     @application.errorhandler(CSRFError)
