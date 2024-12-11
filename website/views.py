@@ -4,6 +4,8 @@ from .models import Glossary, User
 from . import db
 import logging
 
+import re  
+
 views = Blueprint("views", __name__)
 
 GLOSSARYPAGE = "views.glossary"
@@ -25,6 +27,7 @@ def glossary():
     glossaries = Glossary.query.all()
     return render_template("glossary.html", user=current_user, glossaries=glossaries)
 
+
 @login_required
 @views.route("/post-glossary", methods=["GET", "POST"])
 def post_glossary():
@@ -39,9 +42,14 @@ def post_glossary():
         category = request.form.get("category")
         description = request.form.get("description").capitalize()
 
+        # Regex pattern to check if name starts with a letter
+        name_pattern = r"^[A-Za-z]"
+
         if not name:
             flash("Enter a business term name", category="error")
-        elif not category: 
+        elif not re.match(name_pattern, name):  
+            flash("Name must start with a letter and cannot contain numbers or special characters.", category="error")
+        elif not category:
             flash("Select a type for the business term", category="error")
         elif not description:
             flash("Please enter a description for the business term", category="error")
@@ -54,10 +62,11 @@ def post_glossary():
             )
             db.session.add(entry)
             db.session.commit()
-            flash("Business Term Created Successfully..", category="success")
+            flash("Business Term Created Successfully.", category="success")
             return redirect(url_for(GLOSSARYPAGE))
 
     return render_template("post-glossary.html", user=current_user)
+
 
 @login_required
 @views.route("/glossary/edit-term/<int:entry_id>", methods=["GET", "POST"])
